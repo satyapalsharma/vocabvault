@@ -5,6 +5,7 @@ export interface Flashcard {
   id: string
   front: string
   back: string
+  exampleSentence?: string
   deckId?: string
   createdAt: Date
   updatedAt: Date
