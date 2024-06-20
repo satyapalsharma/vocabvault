@@ -1,22 +1,32 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { Flashcard } from '@/types/vocab'
 import { calculateNextReview } from '@/utils/spacedRepetition'
+
+export interface Flashcard {
+  id: string
+  wordId: string
+  deckId: string
+  reviewCount: number
+  easeFactor: number
+  interval: number
+  lastReviewedAt?: Date
+  nextReviewAt: Date
+  createdAt: Date
+  updatedAt: Date
+}
 
 export const useFlashcardStore = defineStore('flashcard', () => {
   const flashcards = ref<Flashcard[]>([])
 
   const getDueFlashcards = computed((): Flashcard[] => {
     const now = new Date()
-    const due = flashcards.value.filter((card) => {
+    return flashcards.value.filter((card) => {
       const nextReview = new Date(card.nextReviewAt)
       return nextReview <= now
     })
-
-    return due
   })
 
-  function getDueFlashcardsByDeck(deckId?: string): Flashcard[] {
+  function getDueFlashcardsFiltered(deckId?: string): Flashcard[] {
     const due = getDueFlashcards.value
 
     if (!deckId) {
@@ -56,7 +66,7 @@ export const useFlashcardStore = defineStore('flashcard', () => {
 
   return {
     flashcards,
-    getDueFlashcards: getDueFlashcardsByDeck,
+    getDueFlashcards: getDueFlashcardsFiltered,
     reviewFlashcard,
   }
 })
