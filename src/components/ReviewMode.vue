@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue'
+import { ref, computed, watch, defineComponent, h } from 'vue'
 import type { Flashcard } from '@/composables/useReviewSession'
 import { useReviewSession } from '@/composables/useReviewSession'
 
@@ -13,110 +13,56 @@ const emit = defineEmits<{
   (e: 'sessionComplete'): void
 }>()
 
-// ── Session ───────────────────────────────────────────────────────────────────
-const { currentCard, isFlipped, hasNext, nextCard, flipCard } =
-  useReviewSession(props.flashcards)
-
-// ── Derived state ─────────────────────────────────────────────────────────────
-/**
- * The session is complete when:
- *  1. There is no next card (we're on the last card), AND
- *  2. The last card has been flipped at least once.
- */
-const isSessionComplete = computed(() => {
-  if (!currentCard.value) return false
-  return !hasNext.value && isFlipped.value
-})
-
-// ── Watchers ──────────────────────────────────────────────────────────────────
-watch(isSessionComplete, (complete) => {
-  if (complete) {
-    emit('sessionComplete')
-  }
-})
-
-// ── Actions ───────────────────────────────────────────────────────────────────
-function handleRestart(): void {
-  // Re-initialise the composable with the same flashcards.
-  // Calling nextCard until we wrap back to index 0 and resetting the flip
-  // state achieves the same effect as a fresh session.
-  while (true) {
-    if (!hasNext.value) {
-      // We're at the last card — flip back and break
-      if (isFlipped.value) flipCard()
-      break
-    }
-    nextCard()
-  }
-  // Ensure we land on the first card with a clean flip state
-  // (the loop above stops at the last card, so we need one more step)
-  // Simpler: just reset by repeatedly calling nextCard until index 0
-  // But nextCard only moves forward; instead we directly reset via a key trick.
-  // We use a reactive key on the session container to force re-mount.
-  // For a composable that doesn't expose a reset, we call nextCard in a loop
-  // cycling through all cards back to start.
-  // ── Most reliable approach: force re-evaluation via a reactive counter ──
-  sessionKey.value++
-}
-
-/**
- * Reactive key used to force the session composable to re-initialise
- * when the user clicks Restart.  We wrap the session in a <component>
- * whose :is binding depends on this key.
- */
+// ── Reactive key used to force re-mount of the session component ──────────────
 const sessionKey = ref(0)
 
 /**
- * Wrapper that re-creates the composable instance whenever sessionKey changes.
+ * Inner component that owns the composable instance.
+ * When `sessionKey` changes Vue destroys this component and creates a fresh
+ * one, which re-runs `useReviewSession()` with clean refs — effectively
+ * "re-initialising the composable with the same flashcards".
  */
-const session = computed(() => useReviewSession(props.flashcards))
+const SessionInner = defineComponent({
+  props: {
+    flashcards: {
+      type: Array as () => Flashcard[],
+      required: true,
+    },
+  },
+  emits: ['sessionComplete'],
+  setup(props, { emit, expose }) {
+    const { currentCard, isFlipped, hasNext, nextCard, flipCard } =
+      useReviewSession(props.flashcards)
 
-// Re-bind local references so the template always uses the latest instance
-const activeSession = computed(() => session.value)
-const current = computed(() => activeSession.value.currentCard)
-const flipped = computed(() => activeSession.value.isFlipped)
-const next = computed(() => activeSession.value.hasNext)
+    const isSessionComplete = computed(() => {
+      if (!currentCard.value) return false
+      return !hasNext.value && isFlipped.value
+    })
 
-function onFlip(): void {
-  activeSession.value.flipCard()
-}
+    watch(isSessionComplete, (done) => {
+      if (done) emit('sessionComplete')
+    })
 
-function onNext(): void {
-  activeSession.value.nextCard()
-}
+    expose({ currentCard, isFlipped, hasNext, nextCard, flipCard, isSessionComplete })
 
-// Override isSessionComplete to use the active session
-const sessionDone = computed(() => {
-  const card = activeSession.value.currentCard
-  if (!card) return false
-  return !activeSession.value.hasNext && activeSession.value.isFlipped
-})
-
-watch(sessionDone, (done) => {
-  if (done) emit('sessionComplete')
-})
-</script>
-
-<template>
-  <div class="review-mode">
-    <!-- ── Active card session ─────────────────────────────────────────────── -->
-    <template v-if="!sessionDone">
+    return { currentCard, isFlipped, hasNext, nextCard, flipCard, isSessionComplete }
+  },
+  template: `
+    <div v-if="!isSessionComplete" class="review-mode">
       <div class="review-mode__scene">
         <div
           class="review-mode__card"
-          :class="{ 'review-mode__card--flipped': flipped }"
+          :class="{ 'review-mode__card--flipped': isFlipped }"
+          @click="flipCard"
         >
-          <!-- Front face -->
           <div class="review-mode__face review-mode__face--front">
-            <div class="review-mode__term">
-              {{ current?.term ?? '—' }}
+            <div class="review-mode__term">{{ currentCard?.term ?? '—' }}</div>
+            <div v-if="currentCard?.pronunciation" class="review-mode__pronunciation">
+              {{ currentCard.pronunciation }}
             </div>
-            <div v-if="current?.pronunciation" class="review-mode__pronunciation">
-              {{ current.pronunciation }}
-            </div>
-            <div v-if="current?.tags?.length" class="review-mode__tags">
+            <div v-if="currentCard?.tags?.length" class="review-mode__tags">
               <span
-                v-for="tag in current.tags"
+                v-for="tag in currentCard.tags"
                 :key="tag"
                 class="review-mode__tag"
               >
@@ -124,66 +70,85 @@ watch(sessionDone, (done) => {
               </span>
             </div>
           </div>
-
-          <!-- Back face -->
           <div class="review-mode__face review-mode__face--back">
             <div class="review-mode__definition">
-              {{ current?.definition ?? '—' }}
+              {{ currentCard?.definition ?? '—' }}
             </div>
-            <div v-if="current?.example" class="review-mode__example">
+            <div v-if="currentCard?.example" class="review-mode__example">
               <span class="review-mode__example-label">Example:</span>
-              {{ current.example }}
+              {{ currentCard.example }}
             </div>
           </div>
         </div>
       </div>
-
-      <!-- ── Controls ─────────────────────────────────────────────────────── -->
       <div class="review-mode__controls">
         <button
-          v-if="!flipped"
+          v-if="!isFlipped"
           class="review-mode__btn review-mode__btn--flip"
-          @click="onFlip"
+          @click.stop="flipCard"
         >
           Flip Card
         </button>
-
         <template v-else>
           <button
             class="review-mode__btn review-mode__btn--next"
-            :disabled="!next"
-            @click="onNext"
+            :disabled="!hasNext"
+            @click.stop="nextCard"
           >
             Next
-            <span v-if="!next" class="review-mode__btn-hint">(last card)</span>
+            <span v-if="!hasNext" class="review-mode__btn-hint">(last card)</span>
           </button>
         </template>
-
         <div class="review-mode__progress">
-          Card {{ activeSession.currentIndex + 1 }} of {{ props.flashcards.length }}
+          Card {{ currentIndex + 1 }} of {{ flashcards.length }}
         </div>
       </div>
-    </template>
+    </div>
+    <div v-else class="review-mode review-mode__completion">
+      <div class="review-mode__completion-icon" aria-hidden="true">🎉</div>
+      <h2 class="review-mode__completion-title">Session Complete!</h2>
+      <p class="review-mode__completion-text">
+        You reviewed all {{ flashcards.length }} card{{ flashcards.length === 1 ? '' : 's' }}.
+      </p>
+      <button class="review-mode__btn review-mode__btn--restart" @click="$emit('restart')">
+        Restart
+      </button>
+    </div>
+  `,
+})
 
-    <!-- ── Session complete ────────────────────────────────────────────────── -->
-    <template v-else>
-      <div class="review-mode__completion">
-        <div class="review-mode__completion-icon" aria-hidden="true">🎉</div>
-        <h2 class="review-mode__completion-title">Session Complete!</h2>
-        <p class="review-mode__completion-text">
-          You reviewed all {{ props.flashcards.length }} card{{
-            props.flashcards.length === 1 ? '' : 's'
-          }}.
-        </p>
-        <button
-          class="review-mode__btn review-mode__btn--restart"
-          @click="sessionKey++"
-        >
-          Restart
-        </button>
-      </div>
-    </template>
-  </div>
+// ── Wrapper that swaps the inner component on restart ─────────────────────────
+const Wrapper = defineComponent({
+  props: {
+    key: { type: Number, required: true },
+    flashcards: { type: Array as () => Flashcard[], required: true },
+  },
+  emits: ['sessionComplete', 'restart'],
+  setup(props, { emit }) {
+    function handleRestart(): void {
+      emit('restart')
+    }
+    return { handleRestart }
+  },
+  template: `
+    <SessionInner
+      :key="key"
+      :flashcards="flashcards"
+      @session-complete="$emit('sessionComplete')"
+      @restart="handleRestart"
+    />
+  `,
+})
+</script>
+
+<!-- The outer shell is a thin wrapper; all real UI lives in SessionInner above -->
+<template>
+  <Wrapper
+    :key="sessionKey"
+    :flashcards="props.flashcards"
+    @session-complete="emit('sessionComplete')"
+    @restart="sessionKey++"
+  />
 </template>
 
 <!-- ── Scoped styles ─────────────────────────────────────────────────────────── -->
