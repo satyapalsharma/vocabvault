@@ -78,6 +78,11 @@ export const useDeckStore = defineStore('deck', {
       this.persist()
     },
 
+    setDecks(decks: Deck[]): void {
+      this.decks = decks
+      this.persist()
+    },
+
     persist() {
       storageService.saveDecks(this.decks)
     },
