@@ -1,4 +1,4 @@
 export * from './vocab'
 export * from './srs'
 export * from './progress'
-export * from './flashcard'
+export * from './deck'
