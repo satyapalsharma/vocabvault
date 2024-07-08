@@ -132,6 +132,11 @@ export const useCardStore = defineStore('card', {
       this.persist()
     },
 
+    setFlashcards(flashcards: Card[]): void {
+      this.cards = flashcards
+      this.persist()
+    },
+
     persist() {
       storageService.saveCards(this.cards)
       storageService.saveWords(this.words)
