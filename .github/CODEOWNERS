@@ -1,0 +1,32 @@
+# Code Owners
+# See https://docs.github.com/en/repositories/creating-and-managing-repositories/defining-the-role-of-the-codeowner-syntax
+
+# Default owner for everything in the repo
+*       @<owner>
+
+# Source code
+/src/          @<owner>
+/src/**/*      @<owner>
+/src/components/ @<owner>
+/src/composables/ @<owner>
+/src/lib/       @<owner>
+/src/router/    @<owner>
+/src/services/  @<owner>
+/src/stores/    @<owner>
+/src/types/     @<owner>
+/src/utils/     @<owner>
+/src/views/     @<owner>
+
+# Tests
+/src/__tests__/ @<owner>
+
+# Configuration files
+/.github/       @<owner>
+/.vscode/       @<owner>
+/tsconfig*.json @<owner>
+/vite.config.ts @<owner>
+/vitest.config.ts @<owner>
+/index.html     @<owner>
+
+# Documentation
+/*.md          @<owner>
