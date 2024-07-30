@@ -1,0 +1,21 @@
+coverage:
+  status:
+    project:
+      default:
+        target: 1%
+        threshold: 1%
+    patch:
+      default:
+        target: 5%
+        threshold: 5%
+
+ignore:
+  - "**/*.test.ts"
+  - "**/*.spec.ts"
+  - "**/__tests__/**"
+  - "**/test/**"
+  - "**/*.config.ts"
+  - "**/*.config.js"
+  - "vite.config.ts"
+  - "vitest.config.ts"
+  - "tsconfig*.json"
