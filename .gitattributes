@@ -1,0 +1,29 @@
+# Set default behavior to automatically normalize line endings.
+* text=auto
+
+# Source files
+*.ts text eol=lf
+*.vue text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.css text eol=lf
+*.scss text eol=lf
+*.html text eol=lf
+*.md text eol=lf
+
+# Binaries
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg binary
+*.woff binary
+*.woff2 binary
+
+# Linguist hints
+*.ts linguist-language=TypeScript
+*.vue linguist-language=Vue
+*.css linguist-language=CSS
+*.json linguist-detectable
+*.md linguist-documentation
