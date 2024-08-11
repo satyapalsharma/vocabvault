@@ -58,3 +58,13 @@ coverage/
 *.pid
 *.seed
 *.pid.lock
+node_modules/
+.next/
+dist/
+.turbo/
+.vercel/
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
