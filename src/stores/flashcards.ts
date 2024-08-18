@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { generateId } from '@/lib/utils'
 
 export interface Flashcard {
   id: string
@@ -13,6 +14,26 @@ export interface Flashcard {
 
 export const useFlashcardStore = defineStore('flashcard', () => {
   const flashcards = ref<Flashcard[]>([])
+
+  function addFlashcard(
+    front: string,
+    back: string,
+    exampleSentence?: string,
+    deckId?: string
+  ): Flashcard {
+    const now = new Date()
+    const flashcard: Flashcard = {
+      id: generateId(),
+      front,
+      back,
+      exampleSentence,
+      deckId,
+      createdAt: now,
+      updatedAt: now,
+    }
+    flashcards.value.push(flashcard)
+    return flashcard
+  }
 
   function updateFlashcard(id: string, updates: Partial<Omit<Flashcard, 'id'>>): void {
     const index = flashcards.value.findIndex((card) => card.id === id)
