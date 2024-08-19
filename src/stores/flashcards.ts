@@ -62,6 +62,7 @@ export const useFlashcardStore = defineStore('flashcard', () => {
 
   return {
     flashcards,
+    addFlashcard,
     updateFlashcard,
     deleteFlashcard,
   }
