@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import type { Deck } from '@/types/deck'
 import { logger } from '@/lib/logger'
 
@@ -12,11 +12,14 @@ export const useDeckStore = defineStore('decks', () => {
       return
     }
 
+    const now = new Date()
     const newDeck: Deck = {
       id: crypto.randomUUID(),
       name: name.trim(),
       description,
-      createdAt: new Date(),
+      cardIds: [],
+      createdAt: now,
+      updatedAt: now,
     }
 
     decks.value.push(newDeck)
