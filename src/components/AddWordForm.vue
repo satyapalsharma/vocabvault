@@ -68,7 +68,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue'
+import { reactive, computed } from 'vue'
 import { useFlashcardStore } from '@/stores/flashcards'
 import { useDeckStore } from '@/stores/deck'
 import type { Deck } from '@/types'
