@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useDashboardStats } from '@/composables/useDashboardStats'
-import type { DeckStats } from '@/composables/useDashboardStats'
 
 const { totalCards, dueCards, retentionRate, statsByDeck } = useDashboardStats()
 
