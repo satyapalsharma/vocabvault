@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import type { Deck } from '@/types'
 import { useRouter } from 'vue-router'
 import { useCardStore } from '@/stores/card'
