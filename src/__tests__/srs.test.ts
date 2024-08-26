@@ -45,8 +45,8 @@ describe('srs', () => {
 
   it('getDueCards returns cards that are due', () => {
     const now = new Date()
-    const dueCard = createCard({ dueDate: new Date(now.getTime() - 1000).toISOString() })
-    const futureCard = createCard({ id: 'card-2', dueDate: new Date(now.getTime() + 100000).toISOString() })
+    const dueCard = createCard({ dueDate: new Date(now.getTime() - 1000) })
+    const futureCard = createCard({ id: 'card-2', dueDate: new Date(now.getTime() + 100000) })
     const due = getDueCards([dueCard, futureCard])
     expect(due).toHaveLength(1)
     expect(due[0].id).toBe('card-1')

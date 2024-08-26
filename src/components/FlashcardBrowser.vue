@@ -8,7 +8,7 @@ import type { Flashcard } from '@/composables/useFlashcardFilters'
 interface Props {
   flashcards: Flashcard[]
 }
-defineProps<Props>()
+const props = defineProps<Props>()
 
 // ── Deck store ───────────────────────────────────────────────────────────────
 const deckStore = useDeckStore()

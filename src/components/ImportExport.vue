@@ -3,7 +3,8 @@ import { ref } from 'vue'
 import { useDeckStore } from '@/stores/deck'
 import { useCardStore } from '@/stores/card'
 import { exportToJSON, importFromJSON, exportToCSV, importFromCSV } from '@/utils/importExport'
-import type { Deck, Flashcard } from '@/utils/importExport'
+import type { Flashcard } from '@/utils/importExport'
+import type { Deck } from '@/types'
 
 const emit = defineEmits<{
   imported: []

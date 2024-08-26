@@ -9,13 +9,13 @@ const props = defineProps<{
 }>()
 
 // ── Emits ─────────────────────────────────────────────────────────────────────
-defineEmits<{
+const emit = defineEmits<{
   (e: 'sessionComplete'): void
   (e: 'restart'): void
 }>()
 
 // ── Session ───────────────────────────────────────────────────────────────────
-const { currentCard, isFlipped, hasNext, nextCard, flipCard } =
+const { currentCard, currentIndex, isFlipped, hasNext, nextCard, flipCard } =
   useReviewSession(props.flashcards)
 
 // ── Derived: is the session finished? ─────────────────────────────────────────
