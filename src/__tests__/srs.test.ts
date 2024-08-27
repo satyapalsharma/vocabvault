@@ -10,9 +10,9 @@ describe('srs', () => {
     interval: 1,
     easeFactor: 2.5,
     repetitions: 0,
-    dueDate: new Date().toISOString(),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    dueDate: new Date(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
     ...overrides,
   })
 
